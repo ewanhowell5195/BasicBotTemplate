@@ -1,4 +1,4 @@
-const prefix = "!"
+const prefixes = ["!", "?"]
 
 export default async message => {
   if (message.author.bot || !message.content) return
@@ -15,17 +15,20 @@ export default async message => {
     messageList.splice(1, 1)
   }
   const start = messageList[0].toLowerCase()
-  if (start.startsWith(prefix)) {
-    const command = start.slice(prefix.length)
-    if (command === "") return
-    const cmd = client.commands.get(command)
-    if (!cmd) {
-      return sendError(message, {
-        title: "Command not found",
-        description: `The command ${command.limit().quote()} was not found`
-      })
+  for (const prefix of prefixes) {
+    if (start.startsWith(prefix)) {
+      const command = start.slice(prefix.length)
+      if (command === "") return
+      const cmd = client.commands.get(command)
+      if (!cmd) {
+        return sendError(message, {
+          title: "Command not found",
+          description: `The command ${command.limit().quote()} was not found`
+        })
+      }
+      message.aliasUsed = command
+      runCommand(cmd, message, messageList.slice(1))
+      break
     }
-    message.aliasUsed = command
-    runCommand(cmd, message, messageList.slice(1))
   }
 }
